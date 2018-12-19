@@ -3,6 +3,47 @@ from matplotlib import pyplot as plt
 import matplotlib.animation as animation
 
 
+def ai_turn(c1,c2):
+    pows=np.array([i.power for i in np.array(c1.master_map.regions)[c1.bords]])
+    targ1=c1.bords[np.argmin(pows)]
+    for i in c1.master_map.neighbs[targ1]:
+        if i in c1.regions:
+            source=i
+            break
+    c1.attack(targ1,source,.2)
+    pows=np.array([i.power for i in np.array(c2.master_map.regions)[c2.bords]])
+    targ2=c2.bords[np.argmin(pows)]
+    for i in c2.master_map.neighbs[targ2]:
+       if i in c2.regions:
+            source=i
+            break
+    c2.attack(targ2,source,.6)
+    c1.resupply(.9,.18)
+    c2.resupply(.9,.2)
+    return np.copy(c1.master_map.array)
+    
+def ani(c1,c2,length=60):
+    """
+    animates a map of random battles between two ai opponents
+    note that c2 has the advantage in this simulation
+    parameters:
+        c1: class country, first country in the war
+        c2: class country, second country in the war
+        length, int number of iterations to keep the war goind for
+    """
+    fig = plt.figure()
+    
+    ims = []
+    for i in range(length):
+        x=ai_turn(c1, c2).astype(float)
+        im = plt.imshow(x, animated=True)
+        ims.append([im])
+
+    ani = animation.ArtistAnimation(fig, ims, interval=200, blit=True,
+                                    repeat_delay=1000)
+
+    plt.show()
+
 def get_neighbors(index, radius, height, width):
     """Calculate the flattened indices of the pixels that are within the given
     distance of a central pixel, and their distances from the central pixel.
@@ -37,7 +78,7 @@ def get_neighbors(index, radius, height, width):
 class region:
     #a class to keep track of a small portion of the big map
     #countries are made up of a collection of regions
-    def __init__(self,cap,land_coors,power,color,type,shape):
+    def __init__(self,land_coors,power,color,type,shape):
         """
         parameters:
             cap:boolean, is this the capital, will be used in later updates
@@ -47,7 +88,6 @@ class region:
             type: string wither land or sea, only land tiles can be invaded
             shape: tuple shape of the full map
         """
-        self.cap=cap
         self.land=land_coors
         bord=[]
         for i in land_coors:
@@ -63,15 +103,17 @@ class region:
     
 class country:
     #class defining a nation
-    def __init__(self,regions,master_map,color):
+    def __init__(self,regions,master_map,color,cap):
         """
         parameters:
             regions, [list-ints] a list of indices corresponding to the regions list for the master-map
             master_map, class map-the map object that this country belongs to
             color, nd-array (,3) the rgb value of the color that will be displayed on the map
         """
-        self.regions=regions
         self.master_map=master_map
+        self.regions=regions
+        self.cap=cap
+        self.master_map.regions[cap].power*=5
         self.color=color
         bords=[]
         for i in regions:
@@ -81,13 +123,15 @@ class country:
         for i in regions:
             self.master_map.regions[i].owner=self
         
-    def attack(self,target,power):
+    def attack(self,target,source,power_portion):
         """
         adds functionality so a country can attack a neighboring region
         parameters:
-            target, int-the index of the list of regions belonging to the master map
-            power, float how much power is being used to attack the region
+            target, int-the index of the region being attacked
+            source, int-the index of the region attacking the target
+            power_portion, float (0,1), portion of the power from source being used to attack
         """
+        power=self.master_map.regions[source].power*power_portion
         if self.master_map.regions[target].type=='land' and target in self.bords:
             res=self.battle(self.master_map.regions[target],power)
             if res>0:
@@ -95,6 +139,7 @@ class country:
                     self.master_map.array[i//self.master_map.shape[1],i%self.master_map.shape[1],:]=self.master_map.regions[target].color
                 self.regions+=[target]
                 self.master_map.regions[target].power=min(power,res)
+                self.master_map.regions[source].power=self.master_map.regions[source].power-power
                 self.master_map.update_color(self.color,target)
                 defender=self.master_map.regions[target].owner
                 if defender:
@@ -104,9 +149,21 @@ class country:
                 self.bords+=[j for j in self.master_map.neighbs[target] if j not in self.regions and j not in self.bords]
             else:
                 self.master_map.regions[target].power=min(self.master_map.regions[target].power,-res)
+                self.master_map.regions[source].power=self.master_map.regions[source].power-power
         else:
             raise ValueError('Target is untargetable, either it is not a border, or it is a sea tile')
         
+    def resupply(self,factor,cap_add):
+        """
+        function to resupply regions belonging to the country
+        """
+        add_factor=(1-factor)/4.6
+        for i in self.regions:
+            self.master_map.regions[i].power*=factor
+            for j in self.master_map.neighbs[i]:
+                self.master_map.regions[j].power+=self.master_map.regions[i].power*add_factor
+        self.master_map.regions[self.cap].power+=cap_add
+    
     def battle(self,target,power):
         """
         determines the winn of invasions
@@ -163,35 +220,6 @@ class map_:
         
         
         
-
-    
-def ani(c1,c2,length=60):
-    """
-    animates a map of random battles between two ai opponents
-    note that c2 has the advantage in this simulation
-    parameters:
-        c1: class country, first country in the war
-        c2: class country, second country in the war
-        length, int number of iterations to keep the war goind for
-    """
-    fig = plt.figure()
-    def f(c1,c2):
-        targ1=c1.bords[np.random.randint(0,len(c1.bords))]
-        c1.attack(targ1,np.random.randn()**2)
-        targ2=c2.bords[np.random.randint(0,len(c2.bords))]
-        c2.attack(targ2,1.5*np.random.randn()**2)
-        return np.copy(c1.master_map.array)
-    ims = []
-    for i in range(length):
-        x=f(c1, c2).astype(float)
-        im = plt.imshow(x, animated=True)
-        ims.append([im])
-
-    ani = animation.ArtistAnimation(fig, ims, interval=200, blit=True,
-                                    repeat_delay=1000)
-
-    plt.show()
-
         
         
         
