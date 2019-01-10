@@ -3,6 +3,7 @@
 #pragma once
 #include "stdafx.h"
 
+//display various pieces
 void display_knight(string board[ROWS][COLUMNS], int row, int column, piece p)
 {
 	string col = " ";
@@ -155,6 +156,7 @@ void clear_sqaure(string board[ROWS][COLUMNS], int row, int column)
 	}
 }
 
+//initialize board with starting pieces
 void board_initialization(string board[ROWS][COLUMNS], piece pieces[32], space spaces[8][8])
 {
 	int k = 0;
@@ -306,6 +308,8 @@ void board_initialization(string board[ROWS][COLUMNS], piece pieces[32], space s
 	display_pawn(board, pieces[23].get_row(), pieces[23].get_column(), pieces[23]);
 	return;
 }
+
+//display the board in the terminal
 void display_board(string board[ROWS][COLUMNS])
 {
 	int k = 0;
@@ -325,6 +329,7 @@ void display_board(string board[ROWS][COLUMNS])
 	cout << "      0             1             2             3             4             5             6             7";
 	cout << endl;
 }
+//see if a king is in check mate
 bool mate(piece king, space ks, piece pieces[32], space all_spaces[8][8]);//ks=king spot, where is the king at or planning on moving to/through
 vector<space> get_move_options(space all_spaces[8][8], piece moving_piece, piece mover_king, piece pieces[32])
 {
@@ -697,6 +702,7 @@ vector<space> get_move_options(space all_spaces[8][8], piece moving_piece, piece
 	return move_options;
 }
 
+//allows a player to choose a move
 int choose_move(vector<space> move_options)
 {
 	int j = 1;
@@ -719,6 +725,7 @@ int choose_move(vector<space> move_options)
 	return k;
 }
 
+//where the actual game is played
 void play_game(string board[ROWS][COLUMNS], piece pieces[32], space spaces[8][8])
 {
 	bool game_over = false;
