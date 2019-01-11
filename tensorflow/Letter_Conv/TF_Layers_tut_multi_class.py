@@ -11,7 +11,9 @@ from scipy import linalg as la
 """
 This code processes images of handwritten letters and creates a CNN to classify these images
 We include every lower case letter as well as select upper case letters
-In addition the model will be trained to recognize various types of images that are not letters such as empty images, and images that only have straight lines
+In addition the model will be trained to recognize various types of images that are not letters such as 
+empty images, and images that only have straight lines
+I also implement an algorithm for calculating levenshtein distance for matching guesses to words from a provided dictionary
 """
 
 #use this dictionary to decode the various  letters

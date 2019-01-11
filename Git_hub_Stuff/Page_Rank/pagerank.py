@@ -1,9 +1,4 @@
-# pagerank.py
-"""Volume 1: The Page Rank Algorithm.
-<Name>
-<Class>
-<Date>
-"""
+
 import numpy as np
 from scipy import sparse
 from scipy import linalg as la
