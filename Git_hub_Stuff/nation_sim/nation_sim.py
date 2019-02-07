@@ -10,7 +10,7 @@ def ai_turn(c1,c2):
         if i in c1.regions:
             source=i
             break
-    c1.attack(targ1,source,.2)
+    c1.attack(targ1,source,.6)
     pows=np.array([i.power for i in np.array(c2.master_map.regions)[c2.bords]])
     targ2=c2.bords[np.argmin(pows)]
     for i in c2.master_map.neighbs[targ2]:
