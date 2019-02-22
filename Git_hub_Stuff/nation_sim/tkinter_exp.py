@@ -34,9 +34,9 @@ def animate(i):
     #        x, y = eachLine.split(",")
     #        xList.append(float(x))
     #        yList.append(float(y))
-    map=sim.ai_turn(c1,c2)
+    map_array=sim.ai_turn(c1,c2)
     a.clear()
-    a.imshow(map)
+    a.imshow(map_array)
     #with open('country1_a.pkl', 'wb') as output:
     #    c1 = pickle.dump(c1,output,pickle.HIGHEST_PROTOCOL)
     #with open('country2_a.pkl', 'wb') as output:

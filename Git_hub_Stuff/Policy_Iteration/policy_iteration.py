@@ -1,9 +1,4 @@
-# policy_iteration.py
-"""Volume 2: Policy Function Iteration.
-<Name>
-<Class>
-<Date>
-"""
+
 
 import numpy as np
 from scipy import linalg as la
